@@ -1,0 +1,204 @@
+
+# coding: utf-8
+
+# <center><b>Modelo matemático para aprendizado de uma máquina de estado (autômata) de um sistema de informação</b></center>
+# <center><b>por Walter Dominguez</b></center>
+# <center>Emap Fgv</center>
+# 
+
+# <center> <b>Modelo Perceptron</b> </center>
+# 
+# $$y(x)=sign((\sum_{i=1}^c w_i x_i)+b)$$
+# $$
+# onde:
+# y(x) : saida da função (pode ser +1 ou -1). 
+# sign: sinal + ou -
+# x: vetor de entrada.
+# i: indice da caracteristica
+# max_int: número maximo de interações
+# w: peso a ser achado. 
+# b: limite a ser achado (inclinação da reta)
+# #$$
+
+# <center><B>PREPARO</B></center>
+
+# In[1]:
+
+#!/usr/bin/env python
+
+
+# aplicativo para verificar se o ser vivo eh quadrupede ou bipede
+
+# quadrupede = 1, bipede = -1
+# cao = [-1,-1,1,1] | resposta = 1
+# gato = [1,1,1,1] | resposta = 1
+# cavalo = [1,1,-1,1] | resposta = 1
+# homem = [-1,-1,-1,1] | resposta = -1
+
+# pesos (sinapses- sinais transmitidos de uma célula para outra)
+w = [0,0,0,0]
+# entradas das caracteristicas por animal (vetor de treinamento)
+x = [[-1,-1,1,1],
+     [1,1,1,1],
+     [1,1,-1,1],
+     [-1,-1,-1,1]]
+# respostas esperadas  (hipótese)
+t = [1,1,1,-1]
+# bias (ajuste fino) inclinação da reta
+b = 0
+#saida
+y = 0
+# numero maximo de ciclos
+c = 10
+# velocidade de aprendizagem
+taxa_aprendizado = 1
+#soma  resultado do samatorio
+soma = 0
+#theshold
+threshold = 1
+# nome do animal
+animal = ""
+# resposta = acerto ou falha
+resposta = ""
+
+# dicionario de dados
+d = {'-1,-1,1,1' : 'cao',
+     '1,1,1,1' : 'gato',
+     '1,1,-1,1' : 'cavalo',
+     '-1,-1,-1,1' : 'homem' }
+
+
+# funcao para converter listas em strings
+def listToString(list):
+    s = str(list).strip('[]')
+    s = s.replace(' ', '')
+    return s
+
+# Resulatado do preparo
+print("Resultado do preparo")
+print("entrada do preparo - x=",x)
+print("saida do preparo - d=",d)
+print("")
+print("Inicialização dos parâmetros:")
+print("Pesos: w=",w)
+print("Bias:  b=",b)
+print("Taxa de aprendizado: taxa_aprendizado=",taxa_aprendizado)
+print("Número maximo de ciclos:  c=",c)
+print("hreshold:  threshold=",threshold)
+print("hipótese:  t=",t)
+print("")
+print("Inicialização das variaveis intermediárias:")
+print("acumula as somas:  soma=",soma)
+print("")
+print("Inicialização das saidas:")
+print("atingiu alvo:  y=",y)
+
+
+# <center><B>INICIO DO TREINAMENTO<B></center>
+
+# In[2]:
+
+# inicio do algoritmo
+for k in range(1,c):
+    acertos = 0    
+    print("INTERACAO "+str(k)+"-------------------------")
+    for i in range(0,len(x)):
+        soma = 0
+
+        # pega o nome do animal no dicionário
+        if listToString(x[i]) in d:
+        #if d.has_key(listToString(x[i])):
+            animal = d[listToString(x[i])]  
+        else:
+            animal = ""
+
+        # para calcular a saida do perceptron, cada entrada de x eh multiplicada
+        # pelo seu peso w correspondente
+        for j in range(0,len(x[i])):
+            soma += x[i][j] * w[j]
+
+        # a saida eh igual a adicao do bias com a soma anterior
+        y_in = b + soma
+        print("b=",b,"w=",w,"y=",y,"k=",k,"j=",j,"c=",c,"y_in=",y_in)
+
+        # funcao de saida eh determinada pelo threshold
+        if y_in > threshold:
+            y = 1
+        elif y_in >= -threshold and y_in <= threshold:
+            y = 0
+        else:
+            y = -1        
+        # atualiza os pesos caso a saida nao corresponda ao valor esperado
+        if y == t[i]:
+            acertos+=1
+            resposta = "acerto"
+        else:
+            for j in range (0,len(w)):                
+                w[j] = w[j] + (taxa_aprendizado * t[i] * x[i][j])
+            b = b + taxa_aprendizado * t[i]
+            resposta = "Falha - Peso atualizado"
+            print("w",w)
+        #imprime a resposta
+        if y == 1:
+            print(animal+" = quadrupede = "+resposta)
+        elif y == 0:
+            print(animal+" = padrao nao identificado = "+resposta)
+        elif y == -1:
+            print(animal+" = bipede = "+resposta)
+
+    if acertos == len(x):
+        print("--------------------------------------------------------------------------------------")
+        print("Funcionalidade aprendida com "+str(k)+" interacoes")
+        break;
+    print("")
+print("Finalizado")
+
+
+# <center><B>RESULTADO DO ALGORITIMO<B></center>
+
+# In[43]:
+
+if acertos == len(x):
+        print("------------------------------Resultado do algoritmo----------------------------------")
+        print("Entrada:","x=",x)
+        print("Caracteristicas por ser vivo:")
+        print(d)
+        print("")
+        print("Parâmetros passados:")
+        print("Resultado esperado(t)=",t,"threshold=",threshold,"num max de ciclos=",c)
+        print("")
+        print("Calculado pelo algoritimo (útima interação)")
+        print("Peso w=",w,"Inclinação da reta b=",b)
+        print("")
+        print("Saida:")
+        print("útima interação:  ","atingiu alvo y=",y,"animal=",animal,"resposta=",resposta,"threshold=",threshold)
+        print("")
+        print("Funcionalidade aprendida com "+str(k)+" interacões")
+        print("")
+print("------------------------------ Finalizado ----------------------------------")        
+
+
+# <center> <b>VISUALIZAÇÃO</b> </center>
+# </br>
+# <center> <b>Dado um conjunto de seres vivos classicação quanto ao número de pernas</b> </center>
+# 
+# <table>
+#  <tr>
+#    <td><IMG src="http://wdz.eng.br/DadosClas.png" WIDTH=60%></td>
+#    <td></td>
+#   <td><IMG src="http://wdz.eng.br/DadosDeclas.png" WIDTH=60%></td>
+#  </tr>
+#  <tr>
+#   <td>Dados Classificados(Visualização da Saida)
+#   <td></td>
+#   <td>Dados não classificados(Visualização da Entrada)
+#  </tr>
+# </table> 
+# 
+# <table>
+# <tr>
+# <td>legenda: 0 - bípede x -quadrúpide</td>
+# </tr>
+# </table>
+
+# In[ ]:
